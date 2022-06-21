@@ -1,0 +1,633 @@
+% $Header$
+
+\documentclass{beamer}
+
+% This file is a solution template for:
+
+% - Giving a talk on some subject.
+% - The talk is between 15min and 45min long.
+% - Style is ornate.
+
+
+
+% Copyright 2004 by Till Tantau <tantau@users.sourceforge.net>.
+%
+% In principle, this file can be redistributed and/or modified under
+% the terms of the GNU Public License, version 2.
+%
+% However, this file is supposed to be a template to be modified
+% for your own needs. For this reason, if you use this file as a
+% template and not specifically distribute it as part of a another
+% package/program, I grant the extra permission to freely copy and
+% modify this file as you see fit and even to delete this copyright
+% notice. 
+
+
+\mode<presentation>
+{
+  \usetheme{Berkeley}
+
+  % Code syntax highlighter
+  \usepackage{minted}
+  
+  \usecolortheme{dove}
+  % or ...
+
+  \definecolor{mainnetGreen}{rgb}{0.24, 0.68, 0.483} % 
+
+  % \usecolortheme[named=mainnetGreen]{structure}
+   \setbeamercolor{palette primary}{bg=mainnetGreen,fg=white}
+   \setbeamercolor{palette secondary}{bg=mainnetGreen,fg=white}
+   \setbeamercolor{palette tertiary}{bg=mainnetGreen,fg=white}
+   \setbeamercolor{palette quaternary}{bg=mainnetGreen,fg=white}
+
+
+  \setbeamercovered{transparent}
+  % or whatever (possibly just delete it)
+}
+
+
+\usepackage[english]{babel}
+% or whatever
+
+\usepackage[latin1]{inputenc}
+% or whatever
+
+
+\usepackage{hyperref}
+\hypersetup{colorlinks=true,allcolors=blue}
+
+\usepackage[T1]{fontenc}
+% Or whatever. Note that the encoding and the font should match. If T1
+% does not look nice, try deleting the line with the fontenc.
+
+
+\title[smartBCH] % (optional, use only with long paper titles)
+{Using SmartBCH via Mainnet Cash}
+
+\subtitle
+{A Quick Start} % (optional)
+
+\author[] % (optional, use only with lots of authors)
+{2qx - github.com/2qx}
+
+\date[HackSmart] % (optional)
+{2022-06-20 / HackSmart Dojo}
+
+\subject{Using SmartBCH with mainnet.cash}
+% This is only inserted into the PDF information catalog. Can be left
+% out. 
+
+
+
+% If you have a file called "university-logo-filename.xxx", where xxx
+% is a graphic format that can be processed by latex or pdflatex,
+% resp., then you can add a logo as follows:
+
+% \pgfdeclareimage[height=0.5cm]{university-logo}{university-logo-filename}
+% \logo{\pgfuseimage{university-logo}}
+
+
+
+% Delete this, if you do not want the table of contents to pop up at
+% the beginning of each subsection:
+% \AtBeginSubsection[]
+% {
+%   \begin{frame}<beamer>{Outline}
+%     \tableofcontents[currentsection]
+%   \end{frame}
+% }
+
+
+% If you wish to uncover everything in a step-wise fashion, uncomment
+% the following command: 
+
+%\beamerdefaultoverlayspecification{<+->}
+
+
+\begin{document}
+
+\begin{frame}
+  \titlepage
+\end{frame}
+
+\begin{frame}{Outline}
+  \tableofcontents
+  % You might wish to add the option [pausesections]
+\end{frame}
+
+
+% Since this a solution template for a generic talk, very little can
+% be said about how it should be structured. However, the talk length
+% of between 15min and 45min and the theme suggest that you stick to
+% the following rules:  
+
+% - Exactly two or three sections (other than the summary).
+% - At *most* three subsections per section.
+% - Talk about 30s to 2min per frame. So there should be between about
+%   15 and 30 frames, all told.
+
+\section{Intro}
+
+\subsection[What You Need]{Pre-installed Software}
+
+\begin{frame}{Suggested Tooling}{To Follow Along On Your Own Battle Station}
+  % - A title should summarize the slide in an understandable fashion
+  %   for anyone how does not follow everything on the slide itself.
+
+  
+
+  \begin{itemize}
+    \item
+    \href{https://raw.githubusercontent.com/2qx/mainnet-tutorial/main/slides/smarthBCH_quickstart.pdf}{These slides}: https://bit.ly/3MZEXJq
+    \item
+    A computer with a POSIX command prompt and some GNU tooling, i.e. (Linux/WSL/Darwin)
+    \item   
+    \href{https://docs.docker.com/get-docker/}{Docker} \& \href{https://docs.docker.com/compose/install/compose-desktop/}{docker-compose}
+    \item
+    The \texttt{mainnet-js} \href{https://github.com/mainnet-cash/mainnet-js/}{source code} \\
+    \texttt{git clone https://github.com/mainnet-cash/mainnet-js.git; cd mainnet-js}
+    \item
+    Run \texttt{yarn regtest:sbch:up} from the mainnet-js root directory to pre-download \& deploy a RegTest network stack.
+    \item
+    Some kind of nodejs, or python http serverlet \\
+    \texttt{python3} or \texttt{npm i reload -g}
+  \item
+    Browser, with Metamask installed
+  \end{itemize}
+\end{frame}
+
+\subsection[Mainnet Cash]{What is Mainnet Cash?}
+
+\begin{frame}{Mainnet Cash is a Specification}{First and foremost.}
+  % - A title should summarize the slide in an understandable fashion
+  %   for anyone how does not follow everything on the slide itself.
+
+  Mainnet Cash is a tool for developers to access Bitcoin Cash
+  \begin{itemize}
+  \item
+    A contract for how a service will be provided.
+  \item
+    Generated and enforced to the specification programmatically, to the extent practical
+  \item
+    The specification: \href{https://rest-unstable.mainnet.cash/api-docs/}{api.yml}
+  \item
+    Specifically, an OpenAPI 3 spec, implement in typescript, used in a generated express server. 
+  \end{itemize}
+  Developer convenience and expediency are valued over perfection, code cleanness or symmetry.
+\end{frame}
+
+\section{Dev Harness}
+
+\subsection[Docker image]{Using the mainnet.cash Docker image}
+
+\begin{frame}[fragile]
+    \frametitle{Starting your own mainnet.cash}
+      To start your own mainnet.cash REST service
+    \rule{\textwidth}{0.9pt}
+    \tiny
+    \begin{minted}{shell}
+# get the image from docker
+docker pull mainnet/mainnet-rest
+
+# start the image, with one process, 
+# exposing locally at 3000 to the container's port 80
+# & pass it details of the regression configuration
+docker run -d --name Mainnet --env WORKERS=1 \ 
+            -p 127.0.0.1:3000:80 \ 
+            --env-file .env.regtest \
+            mainnet/mainnet-rest
+    \end{minted}
+\rule{\textwidth}{0.9pt}
+
+\end{frame}
+
+\begin{frame}[fragile]
+    \frametitle{Stopping your own mainnet.cash}
+      Just in case something \alert{goes wrong}...
+    \rule{\textwidth}{0.6pt}
+    \tiny
+    \begin{minted}{shell}
+# checking logs, to find the issue
+docker logs -f Mainnet
+
+# restarting, stopping, forcefully stopping.
+docker restart Mainnet
+docker stop Mainnet
+docker kill Mainnet
+
+# if your machine is paging memory or sounds like a jet plane
+sudo killall node 
+# kills all docker processes
+docker stop $(docker ps -a -q)
+    \end{minted}
+\rule{\textwidth}{0.6pt}
+assuming your container was given the name "Mainnet".\\
+\end{frame}
+
+\begin{frame}[fragile]
+    \frametitle{More Usage Samples and Configuration Information}
+  % Keep the summary *very short*.
+  \begin{itemize}
+    \item
+      There's more at: \href{https://mainnet.cash/tutorial/running-rest.html}{mainnet.cash/tutorial/running-rest.html}
+    \item
+      Including a full list of \href{https://mainnet.cash/tutorial/running-rest.html#configuration}{configuration variables.}
+    \item
+      This is an \href{https://rest-unstable.mainnet.cash/api-docs/}{unstable version} of the REST service for testing and educational purposes
+    \end{itemize}
+        
+\rule{\textwidth}{0.9pt}
+\end{frame}
+
+\subsection[RegTest Stack]{Spin-up a Full Service Stack in Regtest}
+
+\begin{frame}[fragile]
+    \frametitle{Running a RegTest Stack}
+      The mainnet-js source code contains a full RegTest Stack, deployed with docker compose.
+    \rule{\textwidth}{0.6pt}
+    \tiny
+    \begin{minted}{shell}
+
+#  To start a regtest stack,
+# from the mainnet-js source directory...
+yarn regtest:sbch:up
+
+# reset everything
+yarn regtest:sbch:down; yarn regtest:sbch:up
+    \end{minted}
+\rule{\textwidth}{0.6pt}
+There's more in the \href{http://mainnet.cash/tutorial/#regtest-wallets}{docs}.\\
+
+SmartBCH has \href{https://docs.smartbch.org/smartbch/developers-guide/runsinglenode}{alternative documentation} 
+
+Having your own private networks allow for better tests, testing in time, testing with a RegTest Bitcoin Cash chain. \\ 
+Note: the docker images for the stack took about 6 min to download over wifi.
+\end{frame}
+
+\begin{frame}[fragile]
+    \frametitle{The RegTest Secrets}
+    One of the advantages of RegTest is reusing and sharing secrets  
+    \rule{\textwidth}{0.4pt}
+    \tiny
+    \begin{minted}{javascript}
+ALICE_ID="privkey:regtest:0x758c7be51a76a9b6bc6b3e1a90e5ff4cc27aa054b77b7acb6f4f08a219c1ce45";
+ALICE_ADDRESS="0xE25ddbAF8DD61b627727e03e190E32feddBD1319";
+BOB_ID="seed:regtest:"+
+"total unlock silver actual hunt excuse tone hen fix turtle addict bracket:"+
+"m/44'/60'/0'/0/0";
+BOB_ADDRESS="0xaf9aD25ea3603B0aF520e1B5331d87315B6eB72B";
+    \end{minted}
+\rule{\textwidth}{0.4pt}
+\end{frame}
+
+
+
+
+
+\subsection[Javascript]{Running mainnet-js Bundled Script}
+
+\begin{frame}[fragile]
+    \frametitle{Run the packages from a Browser}
+    When developing from a jsfiddle or codepen...
+    \rule{\textwidth}{0.4pt}
+    \tiny
+    \begin{minted}{html}
+<!-- mainnet-js -->
+<script src="https://cdn.mainnet.cash/mainnet-0.5.4.js"
+        integrity="sha384-W9XdLRFn3qb7qn1+gqFho+FTw9buULZBaQh+uceAAMmK3wKyJ/GC/3kcWUOpSitj"
+        crossorigin="anonymous">
+</script>
+<!-- CashScript -->
+<script src="https://cdn.mainnet.cash/contract/contract-0.5.4.js"
+        integrity="sha384-4htLbqsKWOCH8CvR0ESHkSDw1lRiDXodGnw7e2xc3mcArviVp4neGsHKQKvEs7Wd"
+        crossorigin="anonymous">
+
+</script>
+<!-- SmartBCH -->
+<script src="https://cdn.mainnet.cash/smartbch/smartbch-0.5.4.js"
+        integrity="sha384-sk/jV4NeaEsrfMShEiO3C8zMwEOHzwfrVu6s6EiVoqOmnU87RT7WRsSNxztaxi7v"
+        crossorigin="anonymous">
+</script>
+    \end{minted}
+\rule{\textwidth}{0.4pt}
+\end{frame}
+
+
+\begin{frame}[fragile]
+    \frametitle{Run the packages from a Browser}
+We want to load all the most recent bundles in a browser to access the library from the dev console...
+    \rule{\textwidth}{0.4pt}
+    \tiny
+    \begin{minted}{shell}
+# open a terminal and cd to the mainnet-js directory
+cd projects/mainnet-js
+
+# serve an empty app with the smartBCH bundle preloaded
+python3 -m http.server -d jest/playwright/smartbch/
+
+# python3 may be called python, 
+
+    \end{minted}
+\rule{\textwidth}{0.4pt}
+
+\texttt{npx reload} or similar is fine too. The script \texttt{yarn live}  is a shortcut
+
+You should now have a browser console with the latest bundles on \href{http://127.0.0.1:8000}{port 8000}. 
+\\ Simply pull mainnet-js to update versions.
+\end{frame}
+
+
+\section{sBCH Wallets}
+
+\begin{frame}[fragile]
+    \frametitle{Get a wallet}
+    If you \alert{didn't get RegTest} harness working... \\
+    Create a TestNet Wallet and get the deposit address:
+    \rule{\textwidth}{0.9pt}
+    \tiny
+    \begin{minted}{javascript}
+const alice = await TestNetSmartBchWallet.newRandom();
+// 
+await alice.getBalance()
+// Object { bch: 0, sat: 0, usd: 0 }
+alice.getDepositAddress()
+// "0xE25ddbAF8DD61b627727e03e190E32feddBD1319"
+alice.toString()
+// "seed:t........"
+    \end{minted}
+\rule{\textwidth}{0.9pt}
+
+Save the wallet string, use it again with \texttt{TestNetSmartBchWallet.fromId()}
+\end{frame}
+
+\subsection[Getting Money]{Receiving From Faucet}
+
+\begin{frame}[fragile]
+    \frametitle{Getting Testnet sBCH}
+If you are \alert{not} using RegTest, you can obtain about 0.1 sBCH here:
+    \begin{itemize}
+    \item
+    There is a TestNet \href{http://54.169.31.93:8080/faucet}{faucet here}
+    \item
+    54.169.31.93:8080/faucet    
+    \end{itemize}
+On site users should skip this step if they have RegTest configured.
+\end{frame}
+
+
+\begin{frame}[fragile]
+    \frametitle{Get a wallet}
+    Create a RegTest Wallet and get the deposit address:
+    \rule{\textwidth}{0.9pt}
+    \tiny
+    \begin{minted}{javascript}
+ALICE_ID="privkey:regtest:0x758c7be51a76a9b6bc6b3e1a90e5ff4cc27aa054b77b7acb6f4f08a219c1ce45"
+const alice = await RegTestSmartBchWallet.fromId(ALICE_ID);
+// 
+await alice.getBalance()
+// Object { bch: 10000, sat: 1000000000000, usd: 1141000 }
+alice.getDepositAddress()
+// "0xE25ddbAF8DD61b627727e03e190E32feddBD1319"
+alice.toString()
+// ALICE_ID
+    \end{minted}
+\rule{\textwidth}{0.9pt}
+\end{frame}
+
+
+
+
+\subsection[Sending sBCH]{Send \& Watch for Reciept}
+\begin{frame}[fragile]
+    \frametitle{Sending/Watching}
+    Watch Bob's address as Alice sends coins:
+    \rule{\textwidth}{0.9pt}
+    \tiny
+    \begin{minted}{javascript}
+ALICE_ID="privkey:regtest:0x758c7be51a76a9b6bc6b3e1a90e5ff4cc27aa054b77b7acb6f4f08a219c1ce45"
+alice = await RegTestSmartBchWallet.fromId(ALICE_ID);
+const bob = await RegTestSmartBchWallet.newRandom();
+
+const bobBalanceWatchCancel = bob.watchBalance((balance) => {
+    bobBalanceWatchCancel();
+    console.log("bob got paid!")
+});
+
+alice.send(
+    { address: bob.getDepositAddress(), value: 0.001, unit: "bch" },
+    {},
+    { gasPrice: 10 ** 10 }
+);
+    \end{minted}
+\rule{\textwidth}{0.9pt}
+\end{frame}
+
+
+
+
+
+\section[Web3 Wallets]{Web3 Wallets w/Metamask}
+
+
+\begin{frame}[fragile]
+    \frametitle{Call Metamask}
+    This command will cause your browser to connect to Metamask, \\ on TestNet
+    \rule{\textwidth}{0.9pt}
+    \tiny
+    \begin{minted}{javascript}
+let alice = await Web3TestNetSmartBchWallet.init();
+    \end{minted}
+\rule{\textwidth}{0.9pt}
+\begin{itemize}
+\item   \href{https://docs.smartbch.org/smartbch/testnets}{Official Documentation from SmartBCH}
+\item    Network URL: https://moeing.tech:9545
+\item    The chain ID is: 0x2711 (i.e. 1001)
+\end{itemize}
+\end{frame}
+
+
+
+  \begin{frame}[fragile]
+    \frametitle{Call Regtest Metamask}
+    Trying to repeat the steps above for RegTest will throw an alert with instructions to add 
+    the network manually with parameters
+    \rule{\textwidth}{0.9pt}
+    \tiny
+    \begin{minted}{javascript}
+   await Web3RegTestSmartBchWallet.init();
+    \end{minted}
+\rule{\textwidth}{0.9pt}
+\begin{itemize}
+\item  Network Name: SmartBch RegTest
+\item  New RPC URL: http://127.0.0.1:8545
+\item  Chain ID: 0x2712
+\item  Currency Symbol (optional): BCH
+\end{itemize}
+\end{frame}
+
+\section{SEP-20 Tokens}
+
+
+\subsection[SEP20 with Minting]{SEP20 with Minting}
+
+\begin{frame}[fragile]
+    \frametitle{SEP20 Token genesis with baton}
+    After creating a testnet wallet and funding it with come tsBCH... \ 
+    the following request creates an SEP20 token with a Baton:
+    \rule{\textwidth}{0.9pt}
+    \tiny
+    \begin{minted}{bash}
+curl -X POST https://rest-unstable.mainnet.cash/smartbch/sep20/genesis \
+    -H "Content-Type: application/json" \
+    -d '{
+"walletId":
+<your testnet wallet id>,
+      "name": "Mainnet Coin",
+    "ticker": "MNC",
+    "decimals": 8,
+    "initialAmount": 10,
+"endBaton": false,
+"tokenReceiverAddress": <your testnet address>,
+"batonReceiverAddress": "<your testnet address>",
+}'
+    \end{minted}
+\rule{\textwidth}{0.9pt}
+\end{frame}
+
+
+\begin{frame}[fragile]
+  \frametitle{SEP20 Token genesis with baton}
+  the genesis response should return something like this:
+  \rule{\textwidth}{0.9pt}
+  \tiny
+  \begin{minted}{json}
+    {
+      "tokenId": "0xc216B347d4684fa917dFa52660479935b670564F",
+      "balance": {
+        "name": "Mainnet Coin",
+        "ticker": "MNC",
+        "decimals": 0,
+        "value": "10000",
+        "tokenId": "0xc216B347d4684fa917dFa52660479935b670564F"
+      }
+    }
+  \end{minted}
+\rule{\textwidth}{0.9pt}
+\end{frame}
+
+
+\begin{frame}[fragile]
+  \frametitle{SEP20 Token Mint Request}
+  The following snippet can be used to mint new tokens.
+  \rule{\textwidth}{0.9pt}
+  \tiny
+  \begin{minted}{bash}
+curl -X 'POST' \
+  'https://rest-unstable.mainnet.cash/smartbch/sep20/mint' \
+  -H 'accept: application/json' \
+  -H 'Content-Type: application/json' \
+  -d '{
+  "walletId": <your testnet wallet id>,
+  "value": 100000,
+  "tokenId": <your token  id>,
+  "tokenReceiverAddress": <your receiver address>
+}'
+\end{minted}
+\rule{\textwidth}{0.9pt}
+\end{frame}
+
+
+
+\begin{frame}[fragile]
+  \frametitle{SEP20 Token Mint Response}
+  the mint response should return something like this:
+  \rule{\textwidth}{0.9pt}
+  \tiny
+  \begin{minted}{json}
+{
+  "txId": "0x6a7c03c0ab1c2e170705a7abcbab43cd908cd13f8d416995b0bd6facf48bee42",
+  "balance": {
+    "name": "Mainnet Coin",
+    "ticker": "MNC",
+    "decimals": 0,
+    "value": "110000",
+    "tokenId": "0xc216B347d4684fa917dFa52660479935b670564F"
+  }
+}
+\end{minted}
+\rule{\textwidth}{0.9pt}
+\end{frame}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{State of mainnet.cash}
+
+\begin{frame}{Committed to Adoption}
+Mainnet Cash will be here.
+% Keep the summary *very short*.
+\begin{itemize}
+\item
+    The project \alert{has some remaining funds to handle maintenance}.
+\item
+    Currently in a \alert{feature freeze}.
+\item
+    Seeking \alert{broader adoption}, and usage.
+\item
+    The project is suitable for small or limited value transactions. \$0.02-\$50
+\item
+    An independent \alert{security audit} would be in order before the warnings are removed.
+\end{itemize}
+Warnings aside, mainnet-js was used for the old hop.cash and is in production on \href{https://old.hop.cash}{old.hop.cash}.
+\end{frame}
+
+\begin{frame}{The Future}
+
+Mainnet Cash was built to be maintained.
+% The following outlook is optional.
+\vskip0pt plus.5fill
+
+% Keep the summary *very short*.
+\begin{itemize}
+\item
+    Really conservative and maintenance oriented design choices from the start.
+\item
+    Extensive investment in testing and a testing harness
+\item
+    These values are also apparent in supporting libraries.
+\end{itemize}
+
+
+\begin{itemize}
+\item
+    Outlook
+    \begin{itemize}
+    \item
+    \alert{@bitauth/libauth} has a nice upgrade in the works.
+    \item
+    There are exiting things are happening with both SmartBCH and BCH
+    \end{itemize}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Contact}
+
+    
+    % The following outlook is optional.
+    \vskip0pt plus.5fill
+    
+    % Keep the summary *very short*.
+    \begin{itemize}
+
+       \item More documentation at \href{https://mainnet.cash/tutorial/smartbch.html}{mainnet.cash}
+       \item Please report \href{https://github.com/mainnet-cash/mainnet-js/issues}{Bugs on Github}.
+       \item Join our \href{https://t.me/mainnetcash}{ mainnet.cash Telegram Channel} for support.
+    \end{itemize}
+
+\end{frame}
+
+\end{document}
+
